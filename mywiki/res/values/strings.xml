@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="app_name">mywiki</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_edit">Edit</string>
+    <string name="title_activity_wiki_edit">WikiEdit</string>
+
+</resources>
