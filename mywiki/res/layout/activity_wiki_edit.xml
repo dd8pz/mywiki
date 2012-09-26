@@ -9,14 +9,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/editText1" />
+        android:layout_below="@+id/sidebarButton" />
 
-    <EditText
-        android:id="@+id/editText1"
+    <ImageButton
+        android:id="@+id/sidebarButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:contentDescription="@string/btn_sitebar"
+        android:src="@drawable/ic_sidebar" />
+
+    <ImageButton
+        android:id="@+id/homeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:contentDescription="@string/btn_home"
+        android:src="@drawable/ic_action_home" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/sidebarButton"
+        android:layout_toLeftOf="@+id/searchButton"
+        android:layout_toRightOf="@+id/sidebarButton"
         android:ems="10"
         android:freezesText="true"
         android:inputType="text" >
@@ -25,21 +43,12 @@
     </EditText>
 
     <ImageButton
-        android:id="@+id/homeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:contentDescription="@string/home"
-        android:src="@drawable/ic_action_home" />
-
-    <ImageButton
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/editText1"
-        android:contentDescription="@string/search"
+        android:layout_alignTop="@+id/editText1"
+        android:layout_toLeftOf="@+id/homeButton"
+        android:contentDescription="@string/btn_search"
         android:src="@drawable/ic_action_search" />
 
 </RelativeLayout>
