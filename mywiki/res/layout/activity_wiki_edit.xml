@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/btn_home"
-        android:src="@drawable/ic_action_home" />
+        android:src="@drawable/ic_action_home1" />
 
     <EditText
         android:id="@+id/editText1"
@@ -49,6 +49,6 @@
         android:layout_alignTop="@+id/editText1"
         android:layout_toLeftOf="@+id/homeButton"
         android:contentDescription="@string/btn_search"
-        android:src="@drawable/ic_action_search" />
+        android:src="@drawable/ic_action_search1" />
 
 </RelativeLayout>
