@@ -37,10 +37,7 @@
         android:layout_toRightOf="@+id/sidebarButton"
         android:ems="10"
         android:freezesText="true"
-        android:inputType="text" >
-
-        <requestFocus />
-    </EditText>
+        android:inputType="text" />
 
     <ImageButton
         android:id="@+id/searchButton"
