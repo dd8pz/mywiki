@@ -7,5 +7,10 @@
     <string name="btn_search">Search</string>
     <string name="btn_home">Home</string>
     <string name="btn_sitebar">Sitebar</string>
+    <string name="settingsUrl">URL Wiki-Site:<!--  --></string>
+    <string name="settingsUser">Benutzername:</string>
+    <string name="Password">Password:</string>
+    <string name="OkButton">OK</string>
+    <string name="CancelButton">Abruch</string>
 
 </resources>
