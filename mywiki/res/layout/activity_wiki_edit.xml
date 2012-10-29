@@ -4,48 +4,66 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <WebView
-        android:id="@+id/webView1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/sidebarButton" />
-
     <ImageButton
-        android:id="@+id/sidebarButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:contentDescription="@string/btn_sitebar"
-        android:src="@drawable/ic_sidebar" />
-
-    <ImageButton
-        android:id="@+id/homeButton"
+        android:id="@+id/HomeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:contentDescription="@string/btn_home"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/home"
         android:src="@drawable/ic_action_home1" />
-
-    <EditText
-        android:id="@+id/editText1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/sidebarButton"
-        android:layout_toLeftOf="@+id/searchButton"
-        android:layout_toRightOf="@+id/sidebarButton"
-        android:ems="10"
-        android:freezesText="true"
-        android:inputType="text" />
 
     <ImageButton
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/editText1"
-        android:layout_toLeftOf="@+id/homeButton"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/HomeButton"
         android:contentDescription="@string/btn_search"
         android:src="@drawable/ic_action_search1" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/searchButton"
+        android:layout_toRightOf="@+id/searchButton"
+        android:ems="10"
+        android:freezesText="true"
+        android:inputType="text" />
+
+    <WebView
+        android:id="@+id/webView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/searchButton" />
+
+    <ImageButton
+        android:id="@+id/sidebarButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/HomeButton"
+        android:contentDescription="@string/btn_sitebar"
+        android:src="@drawable/ic_sidebar" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/back"
+        android:src="@drawable/ic_action_back" />
+
+    <ImageButton
+        android:id="@+id/forwardButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/backButton"
+        android:contentDescription="@string/forward"
+        android:src="@drawable/ic_action_forward" />
 
 </RelativeLayout>
