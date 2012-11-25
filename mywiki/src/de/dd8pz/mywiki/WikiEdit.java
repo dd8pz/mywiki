@@ -2,19 +2,22 @@ package de.dd8pz.mywiki;
 
 import java.io.IOException;
 
-import de.dd8pz.mywiki.R.id;
-
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class WikiEdit extends Activity {
 
 	private mySettings MySettings;
+	private viewWiki ViewWiki;
 	@Override
     public void onCreate(Bundle savedInstanceState)  
 	{
@@ -26,7 +29,10 @@ public class WikiEdit extends Activity {
         	Toast.makeText(getApplicationContext(), "Fehler beim Laden der Configuragtion!", Toast.LENGTH_SHORT).show();
         }
         setContentView(R.layout.activity_wiki_edit);
-//        LoadPage();
+        Edited();
+        ViewWiki=new viewWiki(this,(WebView)findViewById(R.id.webView1),MySettings);
+        UpdatePage(What.HISTORY);
+        UpdatePage(What.LOADPAGE);
     }
 
 	@Override
@@ -54,18 +60,54 @@ public class WikiEdit extends Activity {
     		return true;
     	case R.id.menu_settings:
     		MySettings.DialogSettings();
-    		/* LoadPage() */
     		return true;
     	default:
     		return super.onOptionsItemSelected(item);
     	}
     }
-   
-/*    public void LoadPage(mySettings MySettings) {
-        WebView webView1 = (WebView) findViewById(R.id.webView1);
-        EditText editText1 = (EditText) findViewById(R.id.editText1);
-        MySettings.loginSite();
-//        webView1.getSettings().setJavaScriptEnabled(true);
-        webView1.loadUrl(MySettings.getUrl(editText1.getText()));
-    } */
+    public void SearchButton(View view) {
+    	EditText editText=(EditText)findViewById(R.id.editText1);
+    	try {
+    		ViewWiki.LoadPage(MySettings.makeURL(editText.getText().toString()));
+    	} catch (NoSuchFieldException e) {
+    	}
+    }
+    public void Edited() {
+    	EditText editText=(EditText)findViewById(R.id.editText1);
+    	editText.addTextChangedListener(new TextWatcher() {
+    		public void afterTextChanged(Editable ed) {
+    			try {
+    				ViewWiki.LoadPage(MySettings.makeURL(ed.toString()));
+    			} catch (NoSuchFieldException e) {
+    			}
+    		}
+    		public void onTextChanged(CharSequence s,int start,int before,int count) {
+    		}
+    		public void beforeTextChanged(CharSequence s,int start,int count,int after) {
+    		}
+    	});
+    }
+    public enum What { LOADPAGE,HISTORY }
+    public void UpdatePage(What what) {
+    	switch (what) {
+    	case LOADPAGE:
+    		try {
+    			if (MySettings.isCurHistory()) {
+    				ViewWiki.LoadPage(MySettings.getCurHistroy());
+    			} else {
+    				ViewWiki.LoadPage(MySettings.getURL()+MySettings.Favorites.getString());
+    			}
+    		} catch (NoSuchFieldException e) {
+    		}
+    		break;
+    	case HISTORY:
+			ImageButton BackButton=(ImageButton)findViewById(R.id.backButton);
+			ImageButton ForwardButton=(ImageButton)findViewById(R.id.forwardButton);
+			boolean islast=MySettings.isLastHistory();
+			boolean isnext=MySettings.isNextHistory();
+    		BackButton.setClickable(islast);
+    		ForwardButton.setClickable(isnext);
+    		break;
+    	}
+    }
 }

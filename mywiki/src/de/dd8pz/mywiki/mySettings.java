@@ -1,6 +1,5 @@
 package de.dd8pz.mywiki;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.EOFException;
 import java.io.File;
@@ -8,16 +7,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-
+import java.lang.NoSuchFieldException;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-
 
 
 public class mySettings {
@@ -28,40 +24,59 @@ public class mySettings {
 	private String Passwd;
 	private File myDir;
 	private Context context;
-	public String[] History;
-	public ArrayList <String> Favorites;
+	private String[] History;
+	private int HistoryPos;
+	private static final int MaxHistory=20;
+	public FavoritesList Favorites;
 	
 	private void DefaultFavorites() {
-		Favorites.clear();
-		Favorites.add("Hauptseite");
-		Favorites.add("Spezial:Spezialseiten");
-		Favorites.add("Spezial:Letzte_Änderungen");
+		Favorites=new FavoritesList(null,"Hauptseite");
+		FavoritesList tmp=new FavoritesList(Favorites,"Spezial:Spezialseiten");
+		tmp=new FavoritesList(tmp,"Spezial:Letzte_Änderungen");
 	}
 	
 	mySettings(Context mycontext)
 	throws IOException
 	{
 		context=mycontext;
-		History=new String[20];
+		History=new String[MaxHistory];
 		myDir=new File(mycontext.getFilesDir().getAbsolutePath());
-		Favorites = new ArrayList<String>();
 		DefaultSettings();
 		LoadPrefs();
 	}
+	
+	public String getUser() {
+		return User;
+	}
+	public String getPasswd() {
+		return Passwd;
+	}
+	public String makeURL(String Search)
+	throws NoSuchFieldException {
+		if (Search!="") {
+			return URL+Search+Option;
+		}
+		if (isCurHistory()) {
+			return getCurHistroy();	
+		}
+		return URL+Favorites.getString()+Option;
+	}
 	public void DefaultSettings() {
-		URL="http://www.wikipedia.org/wiki/";
-		Option="&skin=xxx";
+		URL="http://en.wikipedia.org/wiki/";
+		Option="?useskin=chick";
 		User="";
 		Passwd="";
 		DefaultFavorites();
-		for (int i=0;i<20;i++) {
+		for (int i=0;i<MaxHistory;i++) {
 			History[i]="";
 		}
+		HistoryPos=-1;
 	}
 	
 	public void LoadPrefs()
 	throws IOException
 	{
+		FavoritesList Fav=Favorites;
 		DefaultSettings();
 		boolean clearedFav=false;
 		String Buffer;
@@ -92,12 +107,21 @@ public class mySettings {
 						Option=Buffer.substring(c+1);
 					else if (Buffer1.equals("favorite")) {
 						if (!clearedFav) {
-							Favorites.clear();
+							Fav=null;
+						}
+						Fav=new FavoritesList(Fav,Buffer.substring(c+1));
+						if (!clearedFav) {
+							Favorites=Fav;
 							clearedFav=true;
 						}
-						Favorites.add(Buffer.substring(c+1));
 					} else if (Buffer1.equals("history")) {
-						if (num<20) {
+						if (num<MaxHistory) {
+							if ((Buffer.substring(c+1, c+2)==">")||(Buffer.substring(c+1,c+2)==" ")) {
+								if (Buffer.substring(c+1,c+2)==">") {
+									HistoryPos=num;
+								}
+								c++;
+							}
 							History[num++]=Buffer.substring(c+1);
 						}
 					}
@@ -122,13 +146,22 @@ public class mySettings {
 		file.newLine();
 		file.write("option="+Option);
 		file.newLine();
-		for (int i=0;i<Favorites.size();i++) {
-			file.write("favorite="+Favorites.get(i));
+		FavoritesList Fav=Favorites;
+		while(Fav!=null) {
+			file.write("favorite="+Fav.getString());
 			file.newLine();
+			Fav=Fav.getNext();
 		}
-		for (int i=0;i<20;i++) {
+		for (int i=0;i<MaxHistory;i++) {
 			if (History[i]!="") {
-				file.write("history="+History[i]);
+				if (i==HistoryPos) {
+					file.write(">"+History[i]);
+				} else if (History[i].startsWith(">")||History[i].startsWith(" ")) {
+					file.write(" "+History[i]);
+				} else {
+					file.write("history="+History[i]);
+				}
+				file.newLine();
 			}
 		}
 		file.close();
@@ -155,11 +188,16 @@ public class mySettings {
 		OptionEdit.setText(Option);
 		OkButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				URL=URLEdit.getText().toString();
+				dialog.dismiss();
+				if (URL!=URLEdit.getText().toString()) {
+					URL=URLEdit.getText().toString();
+					clearHistory();
+					WikiEdit wikiEdit=(WikiEdit)context;
+					wikiEdit.UpdatePage(WikiEdit.What.LOADPAGE);
+				}
 				User=UserEdit.getText().toString();
 				Passwd=PasswdEdit.getText().toString();
 				Option=OptionEdit.getText().toString();
-				dialog.dismiss();
 			}
 		});
 		CancelButton.setOnClickListener(new OnClickListener() {
@@ -171,5 +209,77 @@ public class mySettings {
 	}
 	public void loginSite() {
 		
+	}
+	public void clearHistory() {
+		HistoryPos=-1;
+		for (int i=0;i<MaxHistory;i++) {
+			History[i]="";
+		}
+	}
+	public int findHistory(String search) {
+		for (int i=0;i<MaxHistory;i++) {
+			if (History[i]==search) {
+				return i;
+			}
+		}
+	return -1;
+	}
+	public String getCurHistroy()
+	throws NoSuchFieldException {
+		if (HistoryPos<0) {
+			throw new NoSuchFieldException();
+		}
+		return History[HistoryPos];
+	}
+	public boolean isCurHistory() {
+		return HistoryPos>=0;
+	}
+	public String getLastHistory()
+	throws NoSuchFieldException {
+		if (HistoryPos<=0) {
+			throw new NoSuchFieldException();
+		}
+		return History[--HistoryPos];
+	}
+	public boolean isLastHistory() {
+		return HistoryPos>0;
+	}
+	public String getNextHistory()
+	throws NoSuchFieldException {
+		if (HistoryPos>=MaxHistory-1) {
+			throw new NoSuchFieldException();
+		}
+		if (History[HistoryPos+1]=="") {
+			throw new NoSuchFieldException();
+		}
+		return History[++HistoryPos];
+	}
+	public boolean isNextHistory() {
+		if (HistoryPos>=MaxHistory-1) {
+			return false;
+		}
+		if (History[HistoryPos+1]=="") {
+			return false;
+		}
+		return true;
+	}
+	public void setHistory(String history) {
+		if (findHistory(history)>=0) {
+			return;
+		}
+		if (HistoryPos>=MaxHistory-1) {
+			for(int i=1;i<MaxHistory-1;i++) {
+				History[i-1]=History[i];
+			}
+			HistoryPos--;
+		}
+		History[++HistoryPos]=history;
+	}
+	public String getURL() {
+		return URL;
+	}
+	public boolean TestURL(String testedURL) {
+		return false;
+		/* TUDU: Übergebene URL prüfen, ob von der zubearbeitenden Wiki */
 	}
 }

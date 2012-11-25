@@ -20,6 +20,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/HomeButton"
         android:contentDescription="@string/btn_search"
+        android:onClick="SearchButton"
         android:src="@drawable/ic_action_search1" />
 
     <EditText

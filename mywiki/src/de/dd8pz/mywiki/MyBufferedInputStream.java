@@ -1,6 +1,5 @@
 package de.dd8pz.mywiki;
 
-import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,31 +7,31 @@ import java.io.InputStream;
 public class MyBufferedInputStream extends InputStream {
 
 	private byte[] IOBuffer;
-	private int IOTemp;
-	private int IOLen,IOPos;
+	private byte[] IOTemp;
+	private int IOLen,IOPos,IOTempPos;
 	private InputStream stream;
 	
 	public MyBufferedInputStream(InputStream in) {
 		IOBuffer=new byte[8192];
+		IOTemp=new byte[8192];
 		IOLen=0;
 		IOPos=0;
-		IOTemp=-1;
+		IOTempPos=0;
 		stream=in;
 	}
 	public MyBufferedInputStream(InputStream in,int len) {
 		IOBuffer=new byte[len];
+		IOTemp=new byte[len];
 		IOLen=0;
 		IOPos=0;
-		IOTemp=-1;
+		IOTempPos=0;
 		stream=in;
 	}
 	@Override
 	public int read() 
 	throws EOFException,IOException {
-		if (IOTemp>=0) {
-			int i=IOTemp;
-			IOTemp=-1;
-			return i;
+		if (IOTempPos!=0) {
+			return (int) IOTemp[IOTempPos--] & 0xff;
 		}
 		if (IOLen<0) {
 			throw new EOFException();
@@ -40,35 +39,36 @@ public class MyBufferedInputStream extends InputStream {
 		if ((IOLen==0)||(IOPos==IOLen)) {
 			IOLen=stream.read(IOBuffer);
 			IOPos=0;
-			if (IOLen==0) {
-				return -1;
-			}
-			if (IOLen<0) {
+			if (IOLen<=0) {
 				throw new EOFException();
 			}
 		}
-		return ((int)IOBuffer[IOPos++]);
+		return (int)IOBuffer[IOPos++] & 0xff;
 	}
-	public int push(char b) {
-		if (IOTemp>=0) {
+	public int push(byte b) {
+		if (IOTempPos<IOTemp.length) {
 			return -1;
 		}
-		IOTemp=(int)b;
-		return IOTemp;
+		IOTemp[IOTempPos++]=b;
+		return (int)b & 0xff;
 	}
 	public int read(char[] b) 
 	throws EOFException, IOException {
 		int b1,i;
 		for(i=0;i<b.length;i++) {
-			b1=read();
-			if (b1<0) {
-				break;
+			try {
+				b1=read();
+				b[i]=(char)b1;
+			} catch (EOFException e) {
+				if (i==0) {
+					throw e;
+				}
+				return i;
 			}
-			b[i]=(char)b1;
 		}
 		return i;
 	}
-	public int read(char []b,int off,int len)
+	public int read(char[] b,int off,int len)
 	throws EOFException,IOException {
 		if (off>0) {
 			if (skip(off)<0) {
@@ -78,11 +78,15 @@ public class MyBufferedInputStream extends InputStream {
 		int i,b1;
 		int l=len>b.length?len:b.length;
 		for(i=0;i<l;i++) {
-			b1=read();
-			if (b1<0) {
-				break;
+			try {
+				b1=read();
+				b[i]=(char)b1;
+			} catch (EOFException e) {
+				if (i==0) {
+					throw e;
+				}
+				return i;
 			}
-			b[i]=(char)b1;
 		}
 		return i;
 	}
@@ -90,35 +94,40 @@ public class MyBufferedInputStream extends InputStream {
 	throws EOFException,IOException {
 		String str="";
 		int bl;
-		char x;
 		for(int i=0;i<len;i++) {
-			bl=read();
-			if (bl<0) {
-				break;
+			try {
+				bl=read();
+				str+=(char)bl;
+			} catch (EOFException e) {
+				if (str=="") {
+					throw e;
+				}
+				return str;
 			}
-			x=(char)bl;
-			str+=x;
 		}
 		return str;
 	}
 	public String readLine()
 	throws EOFException,IOException {
 		String str="";
-		char x;
 		int bl;
 		do {
-			bl=read();
-			if (bl<0) {
-				break;
-			}
-			if ((bl==10)||(bl==13)) {
-				int bl1=read();
-				if ((bl!=13)&&(bl1!=10)) {
-					push((char)bl1);
+			try {
+				bl=read();
+				if ((bl==10)||(bl==13)) {
+					int bl1=read();
+					if ((bl!=13)&&(bl1!=10)) {
+						push((byte)bl1);
+					}
+				} else {
+					
+					str+=(char)bl;
 				}
-			} else {
-				x=(char)bl;
-				str+=x;
+			} catch(EOFException e) {
+				if (str=="") {
+					throw e;
+				}
+				return str;
 			}
 		} while((bl!=10)&&(bl!=13));
 	return str;
